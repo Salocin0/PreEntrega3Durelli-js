@@ -1,34 +1,303 @@
-//productos cargados por defecto
-const productos = [
-  { id: 1, nombre: "producto 1", precio: 250 },
-  { id: 2, nombre: "producto 2", precio: 500 },
-  { id: 3, nombre: "producto 3", precio: 750 },
+// Array de productos en la tienda
+let productos = [
+  {
+    id: 1,
+    nombre: "Laptop HP",
+    precio: "$799.99",
+    descripcion: "Portátil de alta gama con pantalla HD y procesador rápido.",
+    stock: 20,
+  },
+  {
+    id: 2,
+    nombre: "Teléfono Samsung Galaxy",
+    precio: "$499.00",
+    descripcion:
+      "Smartphone Android con cámara de alta resolución y pantalla AMOLED.",
+    stock: 15,
+  },
+  {
+    id: 3,
+    nombre: "Smart TV LG",
+    precio: "$599.99",
+    descripcion:
+      "Televisor inteligente con pantalla 4K y aplicaciones integradas.",
+    stock: 10,
+  },
+  {
+    id: 4,
+    nombre: "Cámara Canon EOS",
+    precio: "$899.00",
+    descripcion:
+      "Cámara DSLR con lente intercambiable y grabación de video en Full HD.",
+    stock: 8,
+  },
+  {
+    id: 5,
+    nombre: "Auriculares Sony",
+    precio: "$149.99",
+    descripcion:
+      "Auriculares inalámbricos con cancelación de ruido y sonido de alta calidad.",
+    stock: 25,
+  },
+  {
+    id: 6,
+    nombre: "Tableta Samsung Galaxy Tab",
+    precio: "$299.99",
+    descripcion:
+      "Tableta Android con pantalla táctil y batería de larga duración.",
+    stock: 12,
+  },
+  {
+    id: 7,
+    nombre: "Refrigeradora Whirlpool",
+    precio: "$899.00",
+    descripcion:
+      "Refrigeradora de acero inoxidable con dispensador de agua y hielo.",
+    stock: 6,
+  },
+  {
+    id: 8,
+    nombre: "Impresora Epson",
+    precio: "$129.95",
+    descripcion:
+      "Impresora láser a color con conectividad Wi-Fi y escaneo rápido.",
+    stock: 18,
+  },
+  {
+    id: 9,
+    nombre: "Consola de Juegos Xbox",
+    precio: "$399.99",
+    descripcion:
+      "Consola de juegos con capacidad 4K y amplia biblioteca de juegos.",
+    stock: 14,
+  },
+  {
+    id: 10,
+    nombre: "Bicicleta de Montaña",
+    precio: "$499.00",
+    descripcion:
+      "Bicicleta todoterreno con cuadro de aluminio y suspensiones delanteras.",
+    stock: 9,
+  },
 ];
-const carrito = [];
-//esta funcion agrega un producto nuevo al array de productos
-function agregarProductosATienda() {
-  let respAgr = prompt("¿Desea agregar productos? 1 Si, 0 No");
 
-  while (respAgr != "0") {
-    const nombre = prompt("Nombre del producto");
-    const precio = parseFloat(prompt("Precio del producto"));
+//array de productos en carrito
+let carrito = [];
 
-    if (!isNaN(precio)) {
-      productos.push({
-        id: productos.length + 1,
-        nombre: nombre,
-        precio: precio,
-      });
-    } else {
-      alert("Precio no válido. El producto no se agregó.");
-    }
+let formularioVisible = false;
+let carritoVisible = false;
 
-    respAgr = prompt("¿Desea agregar otro? 1 Si, 0 No");
+const tbody = document.getElementById("bodyTable");
+const mostrarFormularioBtn = document.getElementById("mostrarFormulario");
+const formularioContainer = document.getElementById("formulario");
+const mostrarTablaCarritoBtn = document.getElementById("mostrarFormCarrito");
+const divTablaCarrito = document.getElementById("carrito");
+const numeroCarrito = document.getElementById("numeroCarrito");
+
+// Función para agregar productos al DOM
+function agregarProductosAlDOM() {
+  productos.forEach((producto) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${producto.nombre}</td>
+      <td>${producto.precio}</td>
+      <td>${producto.descripcion}</td>
+      <td>${producto.stock}</td>
+      <td>
+        <button class="btn btn-primary" onclick="agregarProductosACarrito(${producto.id})">
+          <i class="bi bi-plus-circle"></i>
+        </button>
+        <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+      `;
+    tbody.appendChild(row);
+  });
+}
+//funcion para vaciar la tabla
+function vaciarTabla() {
+  while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
   }
 }
+//funcion para agregar productos al carrito
+function agregarProductosACarrito(productoId) {
+  const productoEncontrado = productos.find(
+    (producto) => producto.id === productoId
+  );
+  productoEncontrado.stock--;
+  if (productoEncontrado.stock === 0) {
+    eliminarProducto(productoId);
+  }
+  carrito.push(productoEncontrado);
+  mostrarToast("Producto agregado al carrito");
+  vaciarTabla();
+  agregarProductosAlDOM();
+  cantidadEnCarrito(carrito.length);
+}
+//funcion para eliminar productos
+function eliminarProducto(productoId) {
+  productos = productos.filter((producto) => producto.id !== productoId);
+  vaciarTabla();
+  agregarProductosAlDOM();
+}
+
+function mostrarToast(mensaje) {}
+
+window.addEventListener("load", agregarProductosAlDOM);
+
+const formAgregarProducto = `
+    <form class="container py-3 pb-5" onsubmit="agregarProductosATienda(event)">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="precio" class="form-label">Precio:</label>
+        <input type="number" id="precio" name="precio" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="stock" class="form-label">Stock:</label>
+        <input type="number" id="stock" name="stock" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripcion:</label>
+        <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary align-right">Crear</button>
+      </div>
+    </form>
+`;
+
+const tablaCarrito = 
+carrito.forEach((producto) => {
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${producto.nombre}</td>
+    <td>${producto.precio}</td>
+    <td>${producto.descripcion}</td>
+    <td>${producto.stock}</td>
+    <td>
+      <button class="btn btn-primary" onclick="agregarProductosACarrito(${producto.id})">
+        <i class="bi bi-plus-circle"></i>
+      </button>
+      <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">
+        <i class="bi bi-trash"></i>
+      </button>
+    </td>
+    `;
+  tbody.appendChild(row);
+});
+
+mostrarTablaCarritoBtn.addEventListener("click", () => {
+  if (formularioVisible) {
+    divTablaCarrito.innerHTML = "";
+    divTablaCarrito.style.display = "none";
+    carritoVisible = false;
+  } else if(carrito.length>0) {
+    divTablaCarrito.innerHTML = `<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="bodyTable">
+    </tbody>
+</table>`;
+    divTablaCarrito.style.display = "block";
+    carritoVisible = true;
+    const carritoElement = divTablaCarrito.querySelector("form");
+    carritoElement.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }else{
+    divTablaCarrito.innerHTML = `<h5>Carrito vacio</h5>`;
+    divTablaCarrito.style.display = "block";
+    carritoVisible = true;
+  }
+});
+
+window.addEventListener("click", (e) => {
+  if (
+    !mostrarTablaCarritoBtn.contains(e.target) &&
+    e.target !== divTablaCarrito
+  ) {
+    cerrarFormCarrito()
+  }
+});
+
+mostrarFormularioBtn.addEventListener("click", () => {
+  if (formularioVisible) {
+    formularioContainer.innerHTML = "";
+    formularioContainer.style.display = "none";
+    formularioVisible = false;
+  } else {
+    formularioContainer.innerHTML = formAgregarProducto;
+    formularioContainer.style.display = "block";
+    formularioVisible = true;
+    const formElement = formularioContainer.querySelector("form");
+    formElement.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+});
+
+window.addEventListener("click", (e) => {
+  if (
+    !mostrarFormularioBtn.contains(e.target) &&
+    e.target !== formularioContainer
+  ) {
+    cerrarFormProducto()
+  }
+});
+
+function cantidadEnCarrito(nuevaCantidad) {
+  if (nuevaCantidad > 0) {
+    numeroCarrito.style.display = "inline-block";
+    numeroCarrito.textContent = nuevaCantidad;
+  } else {
+    numeroCarrito.style.display = "none";
+  }
+}
+
+//esta funcion agrega un producto nuevo al array de productos
+function agregarProductosATienda(event) {
+  event.preventDefault();
+  const nombre = document.getElementById("nombre").value;
+  const precio = document.getElementById("precio").value;
+  const stock = document.getElementById("stock").value;
+  const descripcion = document.getElementById("descripcion").value;
+
+  productos.push({ id: productos.length + 1, nombre: nombre, precio: precio, stock: stock, descripcion: descripcion });
+
+  vaciarTabla();
+  agregarProductosAlDOM();
+  cerrarFormProducto();
+  mostrarToast("Producto agregado");
+}
+
+function cerrarFormProducto() {
+  formularioContainer.innerHTML = "";
+  formularioContainer.style.display = "none";
+  formularioVisible = false;
+}
+
+function cerrarFormCarrito() {
+  divTablaCarrito.innerHTML = "";
+  divTablaCarrito.style.display = "none";
+  carritoVisible = false;
+} 
+
+/*
+
 //esta funcion muestra los productos cargados en la tienda y permite agregar un producto al carrito
 function agregarProductosACarrito() {
-  let prodAAgregar = prompt("¿Desea agregar productos al carrito? 1 Si, 0 No");
 
   while (prodAAgregar != "0") {
     let textProductos = "";
@@ -90,7 +359,9 @@ function buscarPorNombre() {
   let continuarBuscando = true;
 
   while (continuarBuscando) {
-    const nombreBuscado = prompt("Ingrese parte del nombre del producto a buscar:");
+    const nombreBuscado = prompt(
+      "Ingrese parte del nombre del producto a buscar:"
+    );
     const productosEncontrados = [];
 
     for (const producto of productos) {
@@ -108,13 +379,17 @@ function buscarPorNombre() {
     } else {
       alert("No se encontraron productos.");
 
-      const seguirBuscando = prompt("¿Quiere buscar otro producto? (1 para sí, 0 para no)");
+      const seguirBuscando = prompt(
+        "¿Quiere buscar otro producto? (1 para sí, 0 para no)"
+      );
       if (seguirBuscando !== "1") {
         continuarBuscando = false;
       }
     }
 
-    const continuarOpcion = prompt("¿Quiere seguir buscando productos por nombre? (1 para sí, 0 para no)");
+    const continuarOpcion = prompt(
+      "¿Quiere seguir buscando productos por nombre? (1 para sí, 0 para no)"
+    );
     if (continuarOpcion !== "1") {
       continuarBuscando = false;
     }
@@ -189,7 +464,7 @@ function aplicarAumento() {
   }
 }
 
-let accion = "";
+/*let accion = "";
 //bucle del menu principal
 while (accion != "9") {
   accion = prompt(
@@ -236,4 +511,4 @@ while (accion != "9") {
       alert("Opción incorrecta");
       break;
   }
-}
+}*/
