@@ -6,7 +6,7 @@ let productos = [
     precio: 799.99,
     descripcion: "Portátil de alta gama con pantalla HD y procesador rápido.",
     stock: 20,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 2,
@@ -15,7 +15,7 @@ let productos = [
     descripcion:
       "Smartphone Android con cámara de alta resolución y pantalla AMOLED.",
     stock: 15,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 3,
@@ -24,7 +24,7 @@ let productos = [
     descripcion:
       "Televisor inteligente con pantalla 4K y aplicaciones integradas.",
     stock: 10,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 4,
@@ -33,7 +33,7 @@ let productos = [
     descripcion:
       "Cámara DSLR con lente intercambiable y grabación de video en Full HD.",
     stock: 8,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 5,
@@ -42,7 +42,7 @@ let productos = [
     descripcion:
       "Auriculares inalámbricos con cancelación de ruido y sonido de alta calidad.",
     stock: 25,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 6,
@@ -51,7 +51,7 @@ let productos = [
     descripcion:
       "Tableta Android con pantalla táctil y batería de larga duración.",
     stock: 12,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 7,
@@ -60,7 +60,7 @@ let productos = [
     descripcion:
       "Refrigeradora de acero inoxidable con dispensador de agua y hielo.",
     stock: 6,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 8,
@@ -69,7 +69,7 @@ let productos = [
     descripcion:
       "Impresora láser a color con conectividad Wi-Fi y escaneo rápido.",
     stock: 18,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 9,
@@ -78,7 +78,7 @@ let productos = [
     descripcion:
       "Consola de juegos con capacidad 4K y amplia biblioteca de juegos.",
     stock: 14,
-    habilitado:1
+    habilitado: 1,
   },
   {
     id: 10,
@@ -87,7 +87,7 @@ let productos = [
     descripcion:
       "Bicicleta todoterreno con cuadro de aluminio y suspensiones delanteras.",
     stock: 9,
-    habilitado:1
+    habilitado: 1,
   },
 ];
 
@@ -114,7 +114,7 @@ const tbodycart = document.getElementById("bodyTablecart");
 // Función para agregar productos al DOM
 function agregarProductosAlDOM(arrayProductos) {
   arrayProductos.forEach((producto) => {
-    if(producto.habilitado===1){
+    if (producto.habilitado === 1) {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${producto.nombre}</td>
@@ -132,7 +132,6 @@ function agregarProductosAlDOM(arrayProductos) {
         `;
       tbody.appendChild(row);
     }
-    
   });
 }
 //funcion para vaciar la tabla
@@ -147,7 +146,7 @@ function vaciarCarrito() {
   }
 }
 //funcion para agregar productos al carrito
-function agregarProductosACarrito(productoId,event) {
+function agregarProductosACarrito(productoId, event) {
   const productoEncontrado = productos.find(
     (producto) => producto.id === productoId
   );
@@ -155,19 +154,22 @@ function agregarProductosACarrito(productoId,event) {
   if (productoEncontrado.stock === 0) {
     eliminarProducto(productoId);
   }
-  const productoExistente = carrito.find(producto => producto.id === productoEncontrado.id);
+  const productoExistente = carrito.find(
+    (producto) => producto.id === productoEncontrado.id
+  );
   if (productoExistente) {
     productoExistente.cantidad++;
-    productoExistente.total = productoExistente.cantidad * productoExistente.precio; 
+    productoExistente.total =
+      productoExistente.cantidad * productoExistente.precio;
   } else {
     const nuevoProducto = {
       id: productoEncontrado.id,
       nombre: productoEncontrado.nombre,
       precio: productoEncontrado.precio,
-      cantidad: 1, 
-      total: productoEncontrado.precio 
+      cantidad: 1,
+      total: productoEncontrado.precio,
     };
-    carrito.push(nuevoProducto); 
+    carrito.push(nuevoProducto);
   }
   mostrarToast("Producto agregado al carrito");
   actualizarTabla();
@@ -175,21 +177,26 @@ function agregarProductosACarrito(productoId,event) {
   actualizarCarrito();
   event?.stopPropagation();
 }
-function quitarProductosACarrito(productoId,event) {
+function quitarProductosACarrito(productoId, event) {
   const productoEncontrado = productos.find(
     (producto) => producto.id === productoId
   );
   if (productoEncontrado.stock === 0) {
-    productoEncontrado.habilitado=1;
+    productoEncontrado.habilitado = 1;
   }
-  productoEncontrado.stock=productoEncontrado.stock+1;
-  
-  const productoExistente = carrito.find(producto => producto.id === productoEncontrado.id);
+  productoEncontrado.stock = productoEncontrado.stock + 1;
+
+  const productoExistente = carrito.find(
+    (producto) => producto.id === productoEncontrado.id
+  );
   if (productoExistente) {
     productoExistente.cantidad--;
-    productoExistente.total = productoExistente.cantidad * productoExistente.precio; 
+    productoExistente.total =
+      productoExistente.cantidad * productoExistente.precio;
     if (productoExistente.cantidad === 0) {
-      carrito = carrito.filter((producto) => producto.id !== productoExistente.id);
+      carrito = carrito.filter(
+        (producto) => producto.id !== productoExistente.id
+      );
     }
   }
   mostrarToast("Producto eliminado de carrito");
@@ -200,23 +207,25 @@ function quitarProductosACarrito(productoId,event) {
 //funcion para eliminar productos
 function eliminarProducto(productoId) {
   productoExistente = productos.find((producto) => producto.id === productoId);
-  productoExistente.habilitado=0;
+  productoExistente.habilitado = 0;
   actualizarTabla();
+  mostrarToast("Producto eliminado");
 }
 function actualizarCarrito() {
   vaciarCarrito();
   cargarProductosEnCarrito();
   cantidadEnCarrito(carrito.length);
 }
-function eliminarProductoDeCarrito(productoId,event) {
+function eliminarProductoDeCarrito(productoId, event) {
   productoExistente = productos.find((producto) => producto.id === productoId);
   productoCart = carrito.find((producto) => producto.id === productoId);
-  productoExistente.habilitado=1;
-  productoExistente.stock=productoCart.cantidad+productoExistente.stock;
+  productoExistente.habilitado = 1;
+  productoExistente.stock = productoCart.cantidad + productoExistente.stock;
   carrito = carrito.filter((producto) => producto.id !== productoCart.id);
   actualizarTabla();
   actualizarCarrito();
   event?.stopPropagation();
+  mostrarToast("Producto eliminado del carrito");
 }
 
 function filtrarProductos(filtro, Min, Max) {
@@ -250,6 +259,7 @@ function aplicarPorcentaje(porcentaje) {
   });
 
   actualizarTabla();
+  mostrarToast("Porcentaje aplicado");
 }
 
 function actualizarTabla() {
@@ -257,14 +267,32 @@ function actualizarTabla() {
 }
 
 function mostrarToast(mensaje) {
-  //TODO
+  var toast = document.createElement("div");
+  toast.className = "toast align-items-center text-white bg-success border-0";
+  toast.setAttribute("role", "alert");
+  toast.setAttribute("aria-live", "assertive");
+  toast.setAttribute("aria-atomic", "true");
+
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        ${mensaje}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  var toastElement = new bootstrap.Toast(toast);
+  toastElement.show();
 }
 
-function borrarCarrito(mensaje,event) {
-  carrito=[]
-  actualizarCarrito();
-  event?.stopPropagation();
-  //TODO VOLVER STOCK DE PRODUCTOS
+function borrarCarrito(mensaje, event) {
+  carrito.forEach(producto => {
+    eliminarProductoDeCarrito(producto.id,event)
+  })
+  mostrarToast("carrito vaciado")
 }
 
 window.addEventListener("load", () => {
@@ -310,63 +338,74 @@ mostrarTablaCarritoBtn.addEventListener("click", () => {
     divTablaCarrito.style.display = "none";
     carritoVisible = false;
   } else if (carrito.length > 0) {
-    cargarProductosEnCarrito();    
+    cargarProductosEnCarrito();
     carritoVisible = true;
-    const divTablaCarritoContainer = divTablaCarrito.querySelector("#tableCart");
+    const divTablaCarritoContainer =
+      divTablaCarrito.querySelector("#tableCart");
     divTablaCarritoContainer.addEventListener("click", (e) => {
       e.stopPropagation();
     });
   } else {
-    divTablaCarrito.innerHTML = '<h5 class="text-center pt-1">No hay productos en el carrito</h5>';
+    divTablaCarrito.innerHTML =
+      '<h5 class="text-center pt-1">No hay productos en el carrito</h5>';
     divTablaCarrito.style.display = "block";
     carritoVisible = true;
-    const mensajeNoProductos = divTablaCarrito.querySelector('h5');
+    const mensajeNoProductos = divTablaCarrito.querySelector("h5");
     mensajeNoProductos.addEventListener("click", (e) => {
       e.stopPropagation();
     });
   }
 });
 
-function cargarProductosEnCarrito(){
-  let tablaCarrito = '<table class="table" id="tableCart">' +
-      '<thead>' +
-      '<tr>' +
-      '<th scope="col">Nombre</th>' +
-      '<th scope="col">Precio</th>' +
-      '<th scope="col">Cantidad</th>' +
-      '<th scope="col">Total</th>' +
-      '<th scope="col">Acciones</th>' +
-      '</tr>' +
-      '</thead>' +
-      '<tbody id="bodyTablecart">';
+function cargarProductosEnCarrito() {
+  let tablaCarrito =
+    '<table class="table" id="tableCart">' +
+    "<thead>" +
+    "<tr>" +
+    '<th scope="col">Nombre</th>' +
+    '<th scope="col">Precio</th>' +
+    '<th scope="col">Cantidad</th>' +
+    '<th scope="col">Total</th>' +
+    '<th scope="col">Acciones</th>' +
+    "</tr>" +
+    "</thead>" +
+    '<tbody id="bodyTablecart">';
 
-    carrito.forEach((producto) => {
-      tablaCarrito += `<tr>
+  carrito.forEach((producto) => {
+    tablaCarrito += `<tr>
         <td>${producto.nombre}</td>
         <td>${Number(producto.precio).toFixed(2)}</td>
         <td>${producto.cantidad}</td>
         <td>${Number(producto.precio * producto.cantidad).toFixed(2)}</td>
         <td>
-        <button class="btn btn-primary" data-product-id="${producto.id}" onclick="quitarProductosACarrito(${producto.id},event)">
+        <button class="btn btn-primary" data-product-id="${
+          producto.id
+        }" onclick="quitarProductosACarrito(${producto.id},event)">
             <i class="bi bi-dash-circle"></i>
           </button>
-          <button class="btn btn-primary" data-product-id="${producto.id}" onclick="agregarProductosACarrito(${producto.id},event)">
+          <button class="btn btn-primary" data-product-id="${
+            producto.id
+          }" onclick="agregarProductosACarrito(${producto.id},event)">
             <i class="bi bi-plus-circle"></i>
           </button>
-          <button class="btn btn-danger" data-product-id="${producto.id}" onclick="eliminarProductoDeCarrito(${producto.id},event)">
+          <button class="btn btn-danger" data-product-id="${
+            producto.id
+          }" onclick="eliminarProductoDeCarrito(${producto.id},event)">
             <i class="bi bi-trash"></i>
           </button>
         </td>
       </tr>`;
-    });
+  });
 
-    tablaCarrito += `</tbody></table>
-    <h4>Total: ${Number(totalCarrito()).toFixed(2)}</h4>
-      <button class="btn btn-danger" onclick="borrarCarrito(event)">Vaciar carrito</button>
-      <button class="btn btn-success" onclick="finalizarCompra()">Finalizar compra</button>`;
+  tablaCarrito += `</tbody></table>
+    <h4 class="text-end">Total: ${Number(totalCarrito()).toFixed(2)}</h4>
+    <div class="d-flex justify-content-between"> <!-- Envuelve los botones en un div con clases de alineación -->
+      <button class="btn btn-danger float-start" onclick="borrarCarrito(event)">Vaciar carrito</button>
+      <button class="btn btn-success float-end" onclick="finalizarCompra()">Finalizar compra</button>
+    </div>`;
 
-      divTablaCarrito.innerHTML = tablaCarrito;
-    divTablaCarrito.style.display = "block";
+  divTablaCarrito.innerHTML = tablaCarrito;
+  divTablaCarrito.style.display = "block";
 }
 
 function totalCarrito() {
@@ -453,4 +492,10 @@ function cerrarFormCarrito() {
   divTablaCarrito.innerHTML = "";
   divTablaCarrito.style.display = "none";
   carritoVisible = false;
+}
+
+function finalizarCompra(){
+  carrito = [];
+  actualizarCarrito();
+  mostrarToast("Compra realizada")
 }

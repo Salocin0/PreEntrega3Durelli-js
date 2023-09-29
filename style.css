@@ -43,8 +43,8 @@ i {
     z-index: 999;
 }
 
-.badge{
-    color:black;
+.badge {
+    color: black;
 }
 
 #numeroCarrito {
@@ -55,13 +55,20 @@ i {
     float: right;
 }
 
-body{
+body {
     color: white;
     background-color: #384155;
 }
 
-.tabla{
+.tabla {
     border-radius: 10px;
     background-color: white;
     color: black;
 }
+
+.toast {
+    position: fixed;
+    bottom: 20px; /* Ajusta esta propiedad para controlar la distancia desde la parte inferior */
+    right: 0%;
+    margin-right: 20px;
+  }
