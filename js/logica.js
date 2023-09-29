@@ -3,81 +3,91 @@ let productos = [
   {
     id: 1,
     nombre: "Laptop HP",
-    precio: "$799.99",
+    precio: 799.99,
     descripcion: "Portátil de alta gama con pantalla HD y procesador rápido.",
     stock: 20,
+    habilitado:1
   },
   {
     id: 2,
     nombre: "Teléfono Samsung Galaxy",
-    precio: "$499.00",
+    precio: 499.0,
     descripcion:
       "Smartphone Android con cámara de alta resolución y pantalla AMOLED.",
     stock: 15,
+    habilitado:1
   },
   {
     id: 3,
     nombre: "Smart TV LG",
-    precio: "$599.99",
+    precio: 599.99,
     descripcion:
       "Televisor inteligente con pantalla 4K y aplicaciones integradas.",
     stock: 10,
+    habilitado:1
   },
   {
     id: 4,
     nombre: "Cámara Canon EOS",
-    precio: "$899.00",
+    precio: 899.0,
     descripcion:
       "Cámara DSLR con lente intercambiable y grabación de video en Full HD.",
     stock: 8,
+    habilitado:1
   },
   {
     id: 5,
     nombre: "Auriculares Sony",
-    precio: "$149.99",
+    precio: 149.99,
     descripcion:
       "Auriculares inalámbricos con cancelación de ruido y sonido de alta calidad.",
     stock: 25,
+    habilitado:1
   },
   {
     id: 6,
     nombre: "Tableta Samsung Galaxy Tab",
-    precio: "$299.99",
+    precio: 299.99,
     descripcion:
       "Tableta Android con pantalla táctil y batería de larga duración.",
     stock: 12,
+    habilitado:1
   },
   {
     id: 7,
     nombre: "Refrigeradora Whirlpool",
-    precio: "$899.00",
+    precio: 899.0,
     descripcion:
       "Refrigeradora de acero inoxidable con dispensador de agua y hielo.",
     stock: 6,
+    habilitado:1
   },
   {
     id: 8,
     nombre: "Impresora Epson",
-    precio: "$129.95",
+    precio: 129.95,
     descripcion:
       "Impresora láser a color con conectividad Wi-Fi y escaneo rápido.",
     stock: 18,
+    habilitado:1
   },
   {
     id: 9,
     nombre: "Consola de Juegos Xbox",
-    precio: "$399.99",
+    precio: 399.99,
     descripcion:
       "Consola de juegos con capacidad 4K y amplia biblioteca de juegos.",
     stock: 14,
+    habilitado:1
   },
   {
     id: 10,
     nombre: "Bicicleta de Montaña",
-    precio: "$499.00",
+    precio: 499.0,
     descripcion:
       "Bicicleta todoterreno con cuadro de aluminio y suspensiones delanteras.",
     stock: 9,
+    habilitado:1
   },
 ];
 
@@ -93,26 +103,36 @@ const formularioContainer = document.getElementById("formulario");
 const mostrarTablaCarritoBtn = document.getElementById("mostrarFormCarrito");
 const divTablaCarrito = document.getElementById("carrito");
 const numeroCarrito = document.getElementById("numeroCarrito");
+const buscador = document.getElementById("buscar");
+const btnporcentaje = document.getElementById("btnporcentaje");
+const inputporcentaje = document.getElementById("inputporcentaje");
+const precioMinimo = document.getElementById("precioMinimo");
+const precioMaximo = document.getElementById("precioMaximo");
+const btnprecio = document.getElementById("btnprecio");
+const tbodycart = document.getElementById("bodyTablecart");
 
 // Función para agregar productos al DOM
-function agregarProductosAlDOM() {
-  productos.forEach((producto) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${producto.nombre}</td>
-      <td>${producto.precio}</td>
-      <td>${producto.descripcion}</td>
-      <td>${producto.stock}</td>
-      <td>
-        <button class="btn btn-primary" onclick="agregarProductosACarrito(${producto.id})">
-          <i class="bi bi-plus-circle"></i>
-        </button>
-        <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">
-          <i class="bi bi-trash"></i>
-        </button>
-      </td>
-      `;
-    tbody.appendChild(row);
+function agregarProductosAlDOM(arrayProductos) {
+  arrayProductos.forEach((producto) => {
+    if(producto.habilitado===1){
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${producto.nombre}</td>
+        <td>$${producto.precio}</td>
+        <td>${producto.descripcion}</td>
+        <td>${producto.stock}</td>
+        <td>
+          <button class="btn btn-primary" onclick="agregarProductosACarrito(${producto.id})">
+            <i class="bi bi-plus-circle"></i>
+          </button>
+          <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+        `;
+      tbody.appendChild(row);
+    }
+    
   });
 }
 //funcion para vaciar la tabla
@@ -121,8 +141,13 @@ function vaciarTabla() {
     tbody.removeChild(tbody.firstChild);
   }
 }
+function vaciarCarrito() {
+  while (tbodycart?.firstChild) {
+    tbodycart.removeChild(tbodycart.firstChild);
+  }
+}
 //funcion para agregar productos al carrito
-function agregarProductosACarrito(productoId) {
+function agregarProductosACarrito(productoId,event) {
   const productoEncontrado = productos.find(
     (producto) => producto.id === productoId
   );
@@ -130,22 +155,130 @@ function agregarProductosACarrito(productoId) {
   if (productoEncontrado.stock === 0) {
     eliminarProducto(productoId);
   }
-  carrito.push(productoEncontrado);
+  const productoExistente = carrito.find(producto => producto.id === productoEncontrado.id);
+  if (productoExistente) {
+    productoExistente.cantidad++;
+    productoExistente.total = productoExistente.cantidad * productoExistente.precio; 
+  } else {
+    const nuevoProducto = {
+      id: productoEncontrado.id,
+      nombre: productoEncontrado.nombre,
+      precio: productoEncontrado.precio,
+      cantidad: 1, 
+      total: productoEncontrado.precio 
+    };
+    carrito.push(nuevoProducto); 
+  }
   mostrarToast("Producto agregado al carrito");
-  vaciarTabla();
-  agregarProductosAlDOM();
+  actualizarTabla();
   cantidadEnCarrito(carrito.length);
+  actualizarCarrito();
+  event?.stopPropagation();
+}
+function quitarProductosACarrito(productoId,event) {
+  const productoEncontrado = productos.find(
+    (producto) => producto.id === productoId
+  );
+  if (productoEncontrado.stock === 0) {
+    productoEncontrado.habilitado=1;
+  }
+  productoEncontrado.stock=productoEncontrado.stock+1;
+  
+  const productoExistente = carrito.find(producto => producto.id === productoEncontrado.id);
+  if (productoExistente) {
+    productoExistente.cantidad--;
+    productoExistente.total = productoExistente.cantidad * productoExistente.precio; 
+    if (productoExistente.cantidad === 0) {
+      carrito = carrito.filter((producto) => producto.id !== productoExistente.id);
+    }
+  }
+  mostrarToast("Producto eliminado de carrito");
+  actualizarTabla();
+  actualizarCarrito();
+  event?.stopPropagation();
 }
 //funcion para eliminar productos
 function eliminarProducto(productoId) {
-  productos = productos.filter((producto) => producto.id !== productoId);
-  vaciarTabla();
-  agregarProductosAlDOM();
+  productoExistente = productos.find((producto) => producto.id === productoId);
+  productoExistente.habilitado=0;
+  actualizarTabla();
+}
+function actualizarCarrito() {
+  vaciarCarrito();
+  cargarProductosEnCarrito();
+  cantidadEnCarrito(carrito.length);
+}
+function eliminarProductoDeCarrito(productoId,event) {
+  productoExistente = productos.find((producto) => producto.id === productoId);
+  productoCart = carrito.find((producto) => producto.id === productoId);
+  productoExistente.habilitado=1;
+  productoExistente.stock=productoCart.cantidad+productoExistente.stock;
+  carrito = carrito.filter((producto) => producto.id !== productoCart.id);
+  actualizarTabla();
+  actualizarCarrito();
+  event?.stopPropagation();
 }
 
-function mostrarToast(mensaje) {}
+function filtrarProductos(filtro, Min, Max) {
+  let productosfiltrados = [];
+  if (Max === "") {
+    const precios = productos.map((producto) => producto.precio);
+    Max = Math.max(...precios);
+  }
+  if (Min === "") {
+    Min = 0;
+  }
 
-window.addEventListener("load", agregarProductosAlDOM);
+  productosfiltrados = productos.filter(
+    (producto) =>
+      producto.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+      producto.descripcion.toLowerCase().includes(filtro.toLowerCase())
+  );
+  productosfiltrados = productosfiltrados.filter(
+    (producto) =>
+      producto.precio >= Number(Min) && producto.precio <= Number(Max)
+  );
+
+  vaciarTabla();
+  agregarProductosAlDOM(productosfiltrados);
+}
+
+function aplicarPorcentaje(porcentaje) {
+  productos = productos.map((producto) => {
+    const precioNuevo = (producto.precio * (1 + porcentaje / 100)).toFixed(2);
+    return { ...producto, precio: precioNuevo };
+  });
+
+  actualizarTabla();
+}
+
+function actualizarTabla() {
+  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
+}
+
+function mostrarToast(mensaje) {
+  //TODO
+}
+
+function borrarCarrito(mensaje,event) {
+  carrito=[]
+  actualizarCarrito();
+  event?.stopPropagation();
+  //TODO VOLVER STOCK DE PRODUCTOS
+}
+
+window.addEventListener("load", () => {
+  agregarProductosAlDOM(productos);
+});
+buscador.addEventListener("input", () => {
+  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
+});
+btnporcentaje.addEventListener("click", () => {
+  aplicarPorcentaje(inputporcentaje.value);
+});
+btnprecio.addEventListener("click", () => {
+  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
+});
 
 const formAgregarProducto = `
     <form class="container py-3 pb-5" onsubmit="agregarProductosATienda(event)">
@@ -155,7 +288,7 @@ const formAgregarProducto = `
       </div>
       <div class="mb-3">
         <label for="precio" class="form-label">Precio:</label>
-        <input type="number" id="precio" name="precio" class="form-control">
+        <input type="number" step="0.01" id="precio" name="precio" class="form-control">
       </div>
       <div class="mb-3">
         <label for="stock" class="form-label">Stock:</label>
@@ -171,64 +304,87 @@ const formAgregarProducto = `
     </form>
 `;
 
-const tablaCarrito = 
-carrito.forEach((producto) => {
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td>${producto.nombre}</td>
-    <td>${producto.precio}</td>
-    <td>${producto.descripcion}</td>
-    <td>${producto.stock}</td>
-    <td>
-      <button class="btn btn-primary" onclick="agregarProductosACarrito(${producto.id})">
-        <i class="bi bi-plus-circle"></i>
-      </button>
-      <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">
-        <i class="bi bi-trash"></i>
-      </button>
-    </td>
-    `;
-  tbody.appendChild(row);
-});
-
 mostrarTablaCarritoBtn.addEventListener("click", () => {
-  if (formularioVisible) {
+  if (carritoVisible) {
     divTablaCarrito.innerHTML = "";
     divTablaCarrito.style.display = "none";
     carritoVisible = false;
-  } else if(carrito.length>0) {
-    divTablaCarrito.innerHTML = `<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Precio</th>
-            <th scope="col">Descripción</th>
-            <th scope="col">Stock</th>
-            <th scope="col">Acciones</th>
-        </tr>
-    </thead>
-    <tbody id="bodyTable">
-    </tbody>
-</table>`;
-    divTablaCarrito.style.display = "block";
+  } else if (carrito.length > 0) {
+    cargarProductosEnCarrito();    
     carritoVisible = true;
-    const carritoElement = divTablaCarrito.querySelector("form");
-    carritoElement.addEventListener("click", (e) => {
+    const divTablaCarritoContainer = divTablaCarrito.querySelector("#tableCart");
+    divTablaCarritoContainer.addEventListener("click", (e) => {
       e.stopPropagation();
     });
-  }else{
-    divTablaCarrito.innerHTML = `<h5>Carrito vacio</h5>`;
+  } else {
+    divTablaCarrito.innerHTML = '<h5 class="text-center pt-1">No hay productos en el carrito</h5>';
     divTablaCarrito.style.display = "block";
     carritoVisible = true;
+    const mensajeNoProductos = divTablaCarrito.querySelector('h5');
+    mensajeNoProductos.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
   }
 });
+
+function cargarProductosEnCarrito(){
+  let tablaCarrito = '<table class="table" id="tableCart">' +
+      '<thead>' +
+      '<tr>' +
+      '<th scope="col">Nombre</th>' +
+      '<th scope="col">Precio</th>' +
+      '<th scope="col">Cantidad</th>' +
+      '<th scope="col">Total</th>' +
+      '<th scope="col">Acciones</th>' +
+      '</tr>' +
+      '</thead>' +
+      '<tbody id="bodyTablecart">';
+
+    carrito.forEach((producto) => {
+      tablaCarrito += `<tr>
+        <td>${producto.nombre}</td>
+        <td>${Number(producto.precio).toFixed(2)}</td>
+        <td>${producto.cantidad}</td>
+        <td>${Number(producto.precio * producto.cantidad).toFixed(2)}</td>
+        <td>
+        <button class="btn btn-primary" data-product-id="${producto.id}" onclick="quitarProductosACarrito(${producto.id},event)">
+            <i class="bi bi-dash-circle"></i>
+          </button>
+          <button class="btn btn-primary" data-product-id="${producto.id}" onclick="agregarProductosACarrito(${producto.id},event)">
+            <i class="bi bi-plus-circle"></i>
+          </button>
+          <button class="btn btn-danger" data-product-id="${producto.id}" onclick="eliminarProductoDeCarrito(${producto.id},event)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>`;
+    });
+
+    tablaCarrito += `</tbody></table>
+    <h4>Total: ${Number(totalCarrito()).toFixed(2)}</h4>
+      <button class="btn btn-danger" onclick="borrarCarrito(event)">Vaciar carrito</button>
+      <button class="btn btn-success" onclick="finalizarCompra()">Finalizar compra</button>`;
+
+      divTablaCarrito.innerHTML = tablaCarrito;
+    divTablaCarrito.style.display = "block";
+}
+
+function totalCarrito() {
+  let total = 0;
+
+  for (const producto of carrito) {
+    total += producto.total;
+  }
+
+  return total.toFixed(2);
+}
 
 window.addEventListener("click", (e) => {
   if (
     !mostrarTablaCarritoBtn.contains(e.target) &&
     e.target !== divTablaCarrito
   ) {
-    cerrarFormCarrito()
+    cerrarFormCarrito();
   }
 });
 
@@ -253,12 +409,12 @@ window.addEventListener("click", (e) => {
     !mostrarFormularioBtn.contains(e.target) &&
     e.target !== formularioContainer
   ) {
-    cerrarFormProducto()
+    cerrarFormProducto();
   }
 });
 
 function cantidadEnCarrito(nuevaCantidad) {
-  if (nuevaCantidad > 0) {
+  if (nuevaCantidad >= 0) {
     numeroCarrito.style.display = "inline-block";
     numeroCarrito.textContent = nuevaCantidad;
   } else {
@@ -274,10 +430,15 @@ function agregarProductosATienda(event) {
   const stock = document.getElementById("stock").value;
   const descripcion = document.getElementById("descripcion").value;
 
-  productos.push({ id: productos.length + 1, nombre: nombre, precio: precio, stock: stock, descripcion: descripcion });
+  productos.push({
+    id: productos.length + 1,
+    nombre: nombre,
+    precio: Number(precio),
+    stock: Number(stock),
+    descripcion: descripcion,
+  });
 
-  vaciarTabla();
-  agregarProductosAlDOM();
+  actualizarTabla();
   cerrarFormProducto();
   mostrarToast("Producto agregado");
 }
@@ -292,223 +453,4 @@ function cerrarFormCarrito() {
   divTablaCarrito.innerHTML = "";
   divTablaCarrito.style.display = "none";
   carritoVisible = false;
-} 
-
-/*
-
-//esta funcion muestra los productos cargados en la tienda y permite agregar un producto al carrito
-function agregarProductosACarrito() {
-
-  while (prodAAgregar != "0") {
-    let textProductos = "";
-    for (const producto of productos) {
-      textProductos += `codigo:${producto.id} producto: ${producto.nombre} precio:${producto.precio}\n`;
-    }
-    prodAAgregar = prompt(
-      textProductos +
-        "Ingrese el número del producto a agregar en el carrito, 0 para dejar de agregar"
-    );
-    prodAAgregar = parseInt(prodAAgregar);
-
-    if (
-      !isNaN(prodAAgregar) &&
-      prodAAgregar >= 0 &&
-      prodAAgregar <= productos.length
-    ) {
-      if (prodAAgregar > 0) {
-        carrito.push(productos[prodAAgregar - 1]);
-        alert("Producto agregado al carrito.");
-      }
-    } else {
-      alert("Número de producto no válido.");
-    }
-  }
 }
-//finaliza el proceso de compra y muestra los productos comprados
-function comprarProductosEnCarrito() {
-  let total = 0;
-  let textProductos = "Productos en el carrito:\n";
-
-  for (const producto of carrito) {
-    textProductos += `codigo:${producto.id + 1} producto: ${
-      producto.nombre
-    } precio:${producto.precio}\n`;
-    total += producto.precio;
-  }
-
-  alert(textProductos);
-  alert(`Total a pagar: $${total.toFixed(2)}`);
-  carrito = [];
-}
-//permite ver los productos que se agregaron en el carrito
-function verCarrito() {
-  let cart = "Productos en el carrito:\n";
-
-  for (const producto of carrito) {
-    cart += `num:${producto.id + 1} producto: ${producto.nombre} precio:${
-      producto.precio
-    }\n`;
-  }
-
-  alert(cart);
-}
-
-// Función para buscar un producto por nombre en la tienda
-// Función para buscar productos por nombre (similitud) en la tienda
-function buscarPorNombre() {
-  let continuarBuscando = true;
-
-  while (continuarBuscando) {
-    const nombreBuscado = prompt(
-      "Ingrese parte del nombre del producto a buscar:"
-    );
-    const productosEncontrados = [];
-
-    for (const producto of productos) {
-      if (producto.nombre.toLowerCase().includes(nombreBuscado.toLowerCase())) {
-        productosEncontrados.push(producto);
-      }
-    }
-
-    if (productosEncontrados.length > 0) {
-      let resultado = "Productos encontrados:\n";
-      for (const producto of productosEncontrados) {
-        resultado += `Codigo: ${producto.id} Producto: ${producto.nombre} Precio: $${producto.precio}\n`;
-      }
-      alert(resultado);
-    } else {
-      alert("No se encontraron productos.");
-
-      const seguirBuscando = prompt(
-        "¿Quiere buscar otro producto? (1 para sí, 0 para no)"
-      );
-      if (seguirBuscando !== "1") {
-        continuarBuscando = false;
-      }
-    }
-
-    const continuarOpcion = prompt(
-      "¿Quiere seguir buscando productos por nombre? (1 para sí, 0 para no)"
-    );
-    if (continuarOpcion !== "1") {
-      continuarBuscando = false;
-    }
-  }
-}
-
-// Función para buscar productos con precio menor a un valor dado
-function buscarPorPrecioMenor() {
-  const precioMaximo = parseFloat(prompt("Ingrese el precio máximo:"));
-  const productosEncontrados = [];
-
-  if (!isNaN(precioMaximo)) {
-    for (const producto of productos) {
-      if (producto.precio <= precioMaximo) {
-        productosEncontrados.push(producto);
-      }
-    }
-
-    if (productosEncontrados.length > 0) {
-      let resultado = "Productos encontrados:\n";
-      for (const producto of productosEncontrados) {
-        resultado += `Codigo: ${producto.id} Producto: ${producto.nombre} Precio: $${producto.precio}\n`;
-      }
-      alert(resultado);
-    } else {
-      alert("No se encontraron productos con precio menor a " + precioMaximo);
-    }
-  } else {
-    alert("Precio máximo no válido.");
-  }
-}
-
-// Función para buscar productos con precio mayor a un valor dado
-function buscarPorPrecioMayor() {
-  const precioMinimo = parseFloat(prompt("Ingrese el precio mínimo:"));
-  const productosEncontrados = [];
-
-  if (!isNaN(precioMinimo)) {
-    for (const producto of productos) {
-      if (producto.precio >= precioMinimo) {
-        productosEncontrados.push(producto);
-      }
-    }
-
-    if (productosEncontrados.length > 0) {
-      let resultado = "Productos encontrados:\n";
-      for (const producto of productosEncontrados) {
-        resultado += `Codigo: ${producto.id} Producto: ${producto.nombre} Precio: $${producto.precio}\n`;
-      }
-      alert(resultado);
-    } else {
-      alert("No se encontraron productos con precio mayor a " + precioMinimo);
-    }
-  } else {
-    alert("Precio mínimo no válido.");
-  }
-}
-
-// Función para aplicar un aumento a todos los productos en la tienda
-function aplicarAumento() {
-  const aumentoPorcentaje = parseFloat(
-    prompt("Ingrese el porcentaje de aumento:")
-  );
-
-  if (!isNaN(aumentoPorcentaje)) {
-    for (const producto of productos) {
-      producto.precio += (producto.precio * aumentoPorcentaje) / 100;
-    }
-    alert("Aumento aplicado a todos los productos en la tienda.");
-  } else {
-    alert("Porcentaje de aumento no válido.");
-  }
-}
-
-/*let accion = "";
-//bucle del menu principal
-while (accion != "9") {
-  accion = prompt(
-    `¿Qué desea hacer?
-     1 => Agregar productos a la tienda
-     2 => Agregar productos al carrito
-     3 => Comprar productos en el carrito
-     4 => Ver carrito
-     5 => Buscar producto por nombre
-     6 => Buscar productos con precio menor a...
-     7 => Buscar productos con precio mayor a...
-     8 => Aplicar aumento a productos
-     9 => Salir`
-  );
-  switch (accion) {
-    case "1":
-      agregarProductosATienda();
-      break;
-    case "2":
-      agregarProductosACarrito();
-      break;
-    case "3":
-      comprarProductosEnCarrito();
-      break;
-    case "4":
-      verCarrito();
-      break;
-    case "5":
-      buscarPorNombre();
-      break;
-    case "6":
-      buscarPorPrecioMenor();
-      break;
-    case "7":
-      buscarPorPrecioMayor();
-      break;
-    case "8":
-      aplicarAumento();
-      break;
-    case "9":
-      alert("Gracias por su compra");
-      break;
-    default:
-      alert("Opción incorrecta");
-      break;
-  }
-}*/

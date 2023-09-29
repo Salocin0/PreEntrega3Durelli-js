@@ -19,7 +19,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item pe-3">
                         <form class="form-inline">
-                            <input class="form-control mr-sm-2" type="search" placeholder="Buscar" aria-label="Search">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Buscar" aria-label="Search" id="buscar" >
                         </form>
                     </li>
                     <li class="nav-item">
@@ -47,13 +47,52 @@
                 <div id="carrito" class="carrito">
                 </div>
             </div>
-            
-            </div>
+
+        </div>
         </div>
 
     </nav>
 
     <section class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Precio Producto</h4>
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label for="porcentaje-productos">Subir % a los productos</label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="number" id="inputporcentaje" class="form-control" placeholder="ej.: 30">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success btn-block" id="btnporcentaje">Aplicar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Filtro de precio</h4>
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label for="rango-precio">Productos entre</label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="number" id="precioMinimo" class="form-control" placeholder="Ej.: 30">
+                            <label for="precio-min" class="input-group-text">-</label>
+                            <input type="number" id="precioMaximo" class="form-control" placeholder="Ej.: 50">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success btn-block" id="btnprecio">Aplicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mt-4 pb-3">
         <h2>Productos</h2>
         <div class="tabla p-2">
             <table class="table">
@@ -70,8 +109,8 @@
                 </tbody>
             </table>
         </div>
-        
     </section>
+
     <script src="./js/logica.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
@@ -84,6 +123,4 @@
         crossorigin="anonymous"></script>
 
 </body>
-</body>
-
 </html>
