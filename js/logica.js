@@ -1,5 +1,5 @@
-// Array de productos en la tienda
-let productos = [
+// Array de productos en la tienda por defecto
+let productosPorDefecto = [
   {
     id: 1,
     nombre: "Laptop HP",
@@ -93,10 +93,12 @@ let productos = [
 
 //array de productos en carrito
 let carrito = [];
-
+//array de productos en tienda
+let productos= [];
+//variables de forms
 let formularioVisible = false;
 let carritoVisible = false;
-
+//variables DOM
 const tbody = document.getElementById("bodyTable");
 const mostrarFormularioBtn = document.getElementById("mostrarFormulario");
 const formularioContainer = document.getElementById("formulario");
@@ -111,8 +113,105 @@ const precioMaximo = document.getElementById("precioMaximo");
 const btnprecio = document.getElementById("btnprecio");
 const tbodycart = document.getElementById("bodyTablecart");
 
+const formAgregarProducto = `
+    <form class="container py-3 pb-5" onsubmit="agregarProductosATienda(event)">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="precio" class="form-label">Precio:</label>
+        <input type="number" step="0.01" id="precio" name="precio" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="stock" class="form-label">Stock:</label>
+        <input type="number" id="stock" name="stock" class="form-control">
+      </div>
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripcion:</label>
+        <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary align-right">Crear</button>
+      </div>
+    </form>
+`;
+
+//eventos
+window.addEventListener("load", () => {
+  productos = cargarProductosDesdeLocalStorage();
+  cargarCarritoDesdeLocalStorage();
+  actualizarCarrito()
+  agregarProductosAlDOM(productos);
+});
+buscador.addEventListener("input", () => {
+  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
+});
+btnporcentaje.addEventListener("click", () => {
+  aplicarPorcentaje(inputporcentaje.value);
+});
+btnprecio.addEventListener("click", () => {
+  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
+});
+mostrarTablaCarritoBtn.addEventListener("click", () => {
+  if (carritoVisible) {
+    divTablaCarrito.innerHTML = "";
+    divTablaCarrito.style.display = "none";
+    carritoVisible = false;
+  } else if (carrito.length > 0) {
+    cargarProductosEnCarrito();
+    carritoVisible = true;
+    const divTablaCarritoContainer =
+      divTablaCarrito.querySelector("#tableCart");
+    divTablaCarritoContainer.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  } else {
+    divTablaCarrito.innerHTML =
+      '<h5 class="text-center pt-1">No hay productos en el carrito</h5>';
+    divTablaCarrito.style.display = "block";
+    carritoVisible = true;
+    const mensajeNoProductos = divTablaCarrito.querySelector("h5");
+    mensajeNoProductos.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+});
+window.addEventListener("click", (e) => {
+  if (
+    !mostrarTablaCarritoBtn.contains(e.target) &&
+    e.target !== divTablaCarrito
+  ) {
+    cerrarFormCarrito();
+  }
+});
+mostrarFormularioBtn.addEventListener("click", () => {
+  if (formularioVisible) {
+    formularioContainer.innerHTML = "";
+    formularioContainer.style.display = "none";
+    formularioVisible = false;
+  } else {
+    formularioContainer.innerHTML = formAgregarProducto;
+    formularioContainer.style.display = "block";
+    formularioVisible = true;
+    const formElement = formularioContainer.querySelector("form");
+    formElement.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+});
+window.addEventListener("click", (e) => {
+  if (
+    !mostrarFormularioBtn.contains(e.target) &&
+    e.target !== formularioContainer
+  ) {
+    cerrarFormProducto();
+  }
+});
+
 // Función para agregar productos al DOM
 function agregarProductosAlDOM(arrayProductos) {
+  console.log(arrayProductos)
   arrayProductos.forEach((producto) => {
     if (producto.habilitado === 1) {
       const row = document.createElement("tr");
@@ -140,6 +239,7 @@ function vaciarTabla() {
     tbody.removeChild(tbody.firstChild);
   }
 }
+//funcion para vaciar el carrito
 function vaciarCarrito() {
   while (tbodycart?.firstChild) {
     tbodycart.removeChild(tbodycart.firstChild);
@@ -147,6 +247,7 @@ function vaciarCarrito() {
 }
 //funcion para agregar productos al carrito
 function agregarProductosACarrito(productoId, event) {
+  console.log(productos,carrito)
   const productoEncontrado = productos.find(
     (producto) => producto.id === productoId
   );
@@ -177,6 +278,7 @@ function agregarProductosACarrito(productoId, event) {
   actualizarCarrito();
   event?.stopPropagation();
 }
+//funcion para quitar productos del carrito
 function quitarProductosACarrito(productoId, event) {
   const productoEncontrado = productos.find(
     (producto) => producto.id === productoId
@@ -211,11 +313,14 @@ function eliminarProducto(productoId) {
   actualizarTabla();
   mostrarToast("Producto eliminado");
 }
+//funcion para actualizar el carrito
 function actualizarCarrito() {
   vaciarCarrito();
   cargarProductosEnCarrito();
   cantidadEnCarrito(carrito.length);
+  guardarCarritoLocal(carrito)
 }
+//funcion para eliminar un producto completo del carrito
 function eliminarProductoDeCarrito(productoId, event) {
   productoExistente = productos.find((producto) => producto.id === productoId);
   productoCart = carrito.find((producto) => producto.id === productoId);
@@ -227,7 +332,7 @@ function eliminarProductoDeCarrito(productoId, event) {
   event?.stopPropagation();
   mostrarToast("Producto eliminado del carrito");
 }
-
+//funcion para filtrar tabla de productos
 function filtrarProductos(filtro, Min, Max) {
   let productosfiltrados = [];
   if (Max === "") {
@@ -247,11 +352,11 @@ function filtrarProductos(filtro, Min, Max) {
     (producto) =>
       producto.precio >= Number(Min) && producto.precio <= Number(Max)
   );
-
+  guardarProductosLocal(productosfiltrados);
   vaciarTabla();
   agregarProductosAlDOM(productosfiltrados);
 }
-
+//funcion para aplicar porcentaje a los productos
 function aplicarPorcentaje(porcentaje) {
   productos = productos.map((producto) => {
     const precioNuevo = (producto.precio * (1 + porcentaje / 100)).toFixed(2);
@@ -261,11 +366,11 @@ function aplicarPorcentaje(porcentaje) {
   actualizarTabla();
   mostrarToast("Porcentaje aplicado");
 }
-
+//funcion para actualizar la tabla
 function actualizarTabla() {
   filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
 }
-
+//funcion para mostrar un toast personalizado
 function mostrarToast(mensaje) {
   var toast = document.createElement("div");
   toast.className = "toast align-items-center text-white bg-success border-0";
@@ -287,76 +392,14 @@ function mostrarToast(mensaje) {
   var toastElement = new bootstrap.Toast(toast);
   toastElement.show();
 }
-
+//funcion para borrar el carrito
 function borrarCarrito(mensaje, event) {
   carrito.forEach(producto => {
     eliminarProductoDeCarrito(producto.id,event)
   })
   mostrarToast("carrito vaciado")
 }
-
-window.addEventListener("load", () => {
-  agregarProductosAlDOM(productos);
-});
-buscador.addEventListener("input", () => {
-  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
-});
-btnporcentaje.addEventListener("click", () => {
-  aplicarPorcentaje(inputporcentaje.value);
-});
-btnprecio.addEventListener("click", () => {
-  filtrarProductos(buscador.value, precioMinimo.value, precioMaximo.value);
-});
-
-const formAgregarProducto = `
-    <form class="container py-3 pb-5" onsubmit="agregarProductosATienda(event)">
-      <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" class="form-control">
-      </div>
-      <div class="mb-3">
-        <label for="precio" class="form-label">Precio:</label>
-        <input type="number" step="0.01" id="precio" name="precio" class="form-control">
-      </div>
-      <div class="mb-3">
-        <label for="stock" class="form-label">Stock:</label>
-        <input type="number" id="stock" name="stock" class="form-control">
-      </div>
-      <div class="mb-3">
-        <label for="descripcion" class="form-label">Descripcion:</label>
-        <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
-      </div>
-      <div>
-        <button type="submit" class="btn btn-primary align-right">Crear</button>
-      </div>
-    </form>
-`;
-
-mostrarTablaCarritoBtn.addEventListener("click", () => {
-  if (carritoVisible) {
-    divTablaCarrito.innerHTML = "";
-    divTablaCarrito.style.display = "none";
-    carritoVisible = false;
-  } else if (carrito.length > 0) {
-    cargarProductosEnCarrito();
-    carritoVisible = true;
-    const divTablaCarritoContainer =
-      divTablaCarrito.querySelector("#tableCart");
-    divTablaCarritoContainer.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-  } else {
-    divTablaCarrito.innerHTML =
-      '<h5 class="text-center pt-1">No hay productos en el carrito</h5>';
-    divTablaCarrito.style.display = "block";
-    carritoVisible = true;
-    const mensajeNoProductos = divTablaCarrito.querySelector("h5");
-    mensajeNoProductos.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-  }
-});
-
+//funcion para cargar los productos en el carrito
 function cargarProductosEnCarrito() {
   let tablaCarrito =
     '<table class="table" id="tableCart">' +
@@ -407,7 +450,7 @@ function cargarProductosEnCarrito() {
   divTablaCarrito.innerHTML = tablaCarrito;
   divTablaCarrito.style.display = "block";
 }
-
+//funcion para calcular el total del carrito
 function totalCarrito() {
   let total = 0;
 
@@ -417,41 +460,7 @@ function totalCarrito() {
 
   return total.toFixed(2);
 }
-
-window.addEventListener("click", (e) => {
-  if (
-    !mostrarTablaCarritoBtn.contains(e.target) &&
-    e.target !== divTablaCarrito
-  ) {
-    cerrarFormCarrito();
-  }
-});
-
-mostrarFormularioBtn.addEventListener("click", () => {
-  if (formularioVisible) {
-    formularioContainer.innerHTML = "";
-    formularioContainer.style.display = "none";
-    formularioVisible = false;
-  } else {
-    formularioContainer.innerHTML = formAgregarProducto;
-    formularioContainer.style.display = "block";
-    formularioVisible = true;
-    const formElement = formularioContainer.querySelector("form");
-    formElement.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-  }
-});
-
-window.addEventListener("click", (e) => {
-  if (
-    !mostrarFormularioBtn.contains(e.target) &&
-    e.target !== formularioContainer
-  ) {
-    cerrarFormProducto();
-  }
-});
-
+//funcion para actualizar el numero de productos en el carrito
 function cantidadEnCarrito(nuevaCantidad) {
   if (nuevaCantidad >= 0) {
     numeroCarrito.style.display = "inline-block";
@@ -460,7 +469,6 @@ function cantidadEnCarrito(nuevaCantidad) {
     numeroCarrito.style.display = "none";
   }
 }
-
 //esta funcion agrega un producto nuevo al array de productos
 function agregarProductosATienda(event) {
   event.preventDefault();
@@ -475,27 +483,53 @@ function agregarProductosATienda(event) {
     precio: Number(precio),
     stock: Number(stock),
     descripcion: descripcion,
+    habilitado: 1
   });
 
   actualizarTabla();
   cerrarFormProducto();
   mostrarToast("Producto agregado");
 }
-
+//funcion para cerrar el formulario de productos
 function cerrarFormProducto() {
   formularioContainer.innerHTML = "";
   formularioContainer.style.display = "none";
   formularioVisible = false;
 }
-
+//funcion para cerrar el formulario de carrito
 function cerrarFormCarrito() {
   divTablaCarrito.innerHTML = "";
   divTablaCarrito.style.display = "none";
   carritoVisible = false;
 }
-
+//funcion para finalizar la compra
 function finalizarCompra(){
   carrito = [];
   actualizarCarrito();
   mostrarToast("Compra realizada")
 }
+//funcion para guardar el contenido de carrito en el local storage
+function guardarCarritoLocal(carrito) {
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+}
+//funcion para guardar el contenido de productos en el local storage
+function guardarProductosLocal(productos) {
+  localStorage.setItem('productos', JSON.stringify(productos));
+}
+//funcion para cargar el contenido de productos desde el local storage
+function cargarProductosDesdeLocalStorage() {
+  const productosGuardados = localStorage.getItem('productos');
+  if (productosGuardados) {
+    return JSON.parse(productosGuardados);
+  } else {
+    localStorage.setItem('productos', JSON.stringify(productosPorDefecto));
+    return productosPorDefecto;
+  }
+}
+function cargarCarritoDesdeLocalStorage() {
+  const carritoGuardado = localStorage.getItem('carrito');
+  if (carritoGuardado) {
+    carrito = JSON.parse(carritoGuardado);
+  }
+}
+
