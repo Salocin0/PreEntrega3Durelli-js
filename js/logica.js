@@ -453,11 +453,9 @@ function cargarProductosEnCarrito() {
 //funcion para calcular el total del carrito
 function totalCarrito() {
   let total = 0;
-
   for (const producto of carrito) {
     total += producto.total;
   }
-
   return total.toFixed(2);
 }
 //funcion para actualizar el numero de productos en el carrito

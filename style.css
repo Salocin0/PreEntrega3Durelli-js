@@ -1,6 +1,5 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css");
 
-/* Estilo para centrar el contenido en los botones */
 i {
     display: flex;
     justify-content: center;
@@ -68,7 +67,7 @@ body {
 
 .toast {
     position: fixed;
-    bottom: 20px; /* Ajusta esta propiedad para controlar la distancia desde la parte inferior */
+    bottom: 20px;
     right: 0%;
     margin-right: 20px;
   }
